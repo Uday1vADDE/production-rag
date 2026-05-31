@@ -7,6 +7,10 @@ from ingest import process_pdf
 from pipeline import get_answers
 from retrieval import retrieve
 
+# Create data folder if it doesn't exist
+os.makedirs("data", exist_ok=True)
+os.makedirs("vectorstore", exist_ok=True)
+
 st.set_page_config(
     page_title="Production RAG System",
     page_icon="📄",
