@@ -8,6 +8,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from rank_bm25 import BM25Okapi
 from dotenv import load_dotenv
 import pickle
+import re
 
 load_dotenv()
 
@@ -65,7 +66,13 @@ def store_bm25(chunks,pdf_path):
     bm25=BM25Okapi(tokenized_chunks)
 
     #save to vectorstore using pickle
-    collection_name=Path(pdf_path).stem.replace(" ","_").lower()
+    
+    stem = Path(pdf_path).stem.lower()
+    collection_name = re.sub(r'[^a-z0-9._-]', '_', stem)
+    collection_name = re.sub(r'_+', '_', collection_name)  # collapse multiple underscores
+    collection_name = collection_name.strip('_-.')
+    if len(collection_name) < 3:
+        collection_name = "pdf_" + collection_name
     bm25_path=f"vectorstore/{collection_name}_bm25.pkl"
     with open(bm25_path,"wb") as f:
         pickle.dump(bm25,f)
