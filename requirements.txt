@@ -1,0 +1,11 @@
+langchain
+langchain-core
+langchain-community
+langchain-groq
+chromadb
+sentence-transformers
+rank-bm25
+pypdf
+python-dotenv
+pydantic
+streamlit

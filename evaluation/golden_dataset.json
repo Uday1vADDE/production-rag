@@ -1,0 +1,42 @@
+[
+    {
+        "question": "What does MCP stand for?",
+        "ground_truth": "MCP stands for Model Context Protocol"
+    },
+    {
+        "question": "Who developed MCP?",
+        "ground_truth": "MCP is an open standard developed by Anthropic"
+    },
+    {
+        "question": "When was MCP released?",
+        "ground_truth": "MCP was released by Anthropic as an open standard in November 2024"
+    },
+    {
+        "question": "What are the three main components of MCP architecture?",
+        "ground_truth": "MCP follows a client-server architecture with three main components: MCP Host, MCP Client, and MCP Server"
+    },
+    {
+        "question": "What message format does MCP use for communication?",
+        "ground_truth": "The communication between client and server uses JSON-RPC 2.0 as the message format"
+    },
+    {
+        "question": "What are the three primitives of MCP?",
+        "ground_truth": "MCP servers can expose three types of capabilities called primitives: Tools, Resources, and Prompts"
+    },
+    {
+        "question": "What are the two transport mechanisms supported by MCP?",
+        "ground_truth": "MCP supports two transport mechanisms: stdio (Standard Input/Output) and HTTP with SSE (Server-Sent Events)"
+    },
+    {
+        "question": "How does MCP improve integration complexity compared to traditional API integration?",
+        "ground_truth": "Before MCP the complexity was N x M (N models times M tools). With MCP the complexity becomes N + M because each model implements MCP once and each tool implements MCP once"
+    },
+    {
+        "question": "What programming languages does Anthropic provide official SDKs for?",
+        "ground_truth": "Anthropic provides official SDKs for Python and TypeScript"
+    },
+    {
+        "question": "What security features does MCP include?",
+        "ground_truth": "MCP includes Explicit User Consent, Sandboxing, Minimal Permissions, and Local Execution as security features"
+    }
+]
