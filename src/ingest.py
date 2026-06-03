@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader,Docx2txtLoader,TextLoader,CSVLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 #from langchain_community.vectorstores import Chroma
 from langchain_chroma import Chroma
@@ -19,6 +19,27 @@ embeddings=HuggingFaceEmbeddings(
         encode_kwargs={"normalize_embeddings": True}
 
     )
+
+def load_document(file_path):
+    extension = Path(file_path).suffix.lower()
+    print(f"Loading {extension} file: {file_path}")
+
+    if extension == ".pdf":
+        loader = PyPDFLoader(file_path)
+    elif extension == ".docx":
+        loader = Docx2txtLoader(file_path)
+    elif extension == ".txt":
+        loader = TextLoader(file_path)
+    elif extension == ".csv":
+        loader = CSVLoader(file_path)
+    else:
+        raise ValueError(f"Unsupported file type: {extension}")
+
+    pages = loader.load()
+    print(f"Loaded {len(pages)} pages")
+    return pages
+
+
 
 def load_pdf(pdf_path):
     print(f"Loading pdf:{pdf_path}")
@@ -86,7 +107,7 @@ def store_bm25(chunks,pdf_path):
     return bm25, texts
 
 
-def process_pdf(pdf_path):
+def process_document(pdf_path):
     print(f"\n{'='*50}")
     print(f"Processing: {pdf_path}")
     print(f"{'='*50}")
@@ -117,7 +138,7 @@ def process_pdf(pdf_path):
         return vectorstore,bm25,texts,pdf_name
     
     #fresh proceesing
-    pages=load_pdf(pdf_path)
+    pages=load_document(pdf_path)
     chunks=split_documents(pages)
     vectorstore,collection_name=store_in_vectordb(chunks,pdf_path)
     bm25,texts=store_bm25(chunks,pdf_path)

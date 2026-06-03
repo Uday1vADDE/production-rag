@@ -2,7 +2,7 @@ import sys
 sys.path.append("src")
 import streamlit as st
 import os
-from ingest import process_pdf
+from ingest import process_document
 from pipeline import get_answers
 from retrieval import retrieve
 
@@ -289,7 +289,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="section-label">Document</div>', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("upload", type="pdf", label_visibility="collapsed")
+    uploaded_file = st.file_uploader("upload", type=["pdf", "docx", "txt", "csv"], label_visibility="collapsed")
 
     if uploaded_file is not None:
         save_path = f"data/{uploaded_file.name}"
@@ -298,7 +298,7 @@ with st.sidebar:
             with open(save_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
             with st.spinner("Processing..."):
-                process_pdf(save_path)
+                process_document(save_path)
             st.session_state.pdf_processed = True
             st.session_state.pdf_path = save_path
             st.session_state.chat_history = []
