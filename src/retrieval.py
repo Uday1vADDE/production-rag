@@ -6,6 +6,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from rank_bm25 import BM25Okapi
 from sentence_transformers import CrossEncoder
 from dotenv import load_dotenv
+from ingest import sanitize_collection_name
 
 load_dotenv()
 
@@ -19,7 +20,7 @@ reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
 
 def load_retrievers(pdf_path):
-    pdf_name=Path(pdf_path).stem.replace(" ","_").lower()
+    pdf_name=sanitize_collection_name(pdf_path)
 
     bm25_path=f"vectorstore/{pdf_name}_bm25.pkl"
     texts_path=f"vectorstore/{pdf_name}_texts.pkl"
