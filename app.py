@@ -312,6 +312,8 @@ else:
     if query:
         st.session_state.chat_history.append({"role": "user", "content": query})
 
+        st.write(st.session_state.file_paths)  # debug
+
         chunks = retrieve(
             st.session_state.file_paths,
             query,
