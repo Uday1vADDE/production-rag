@@ -63,7 +63,8 @@ Standalone question:"""
 
 def build_prompt(chunks, query):
     data = promt_call()
-    context = "\n\n".join([f"Chunk {i+1}: {chunk}" for i, chunk in enumerate(chunks)])
+    #context = "\n\n".join([f"Chunk {i+1}: {chunk}" for i, chunk in enumerate(chunks)])
+    context = "\n\n".join([f"Chunk {i+1} (from {chunk['source']}): {chunk['text']}" for i, chunk in enumerate(chunks)])
     rules_text = "\n".join([f"- {rule}" for rule in data["rag_prompt"]["rules"]])
     system_message = data["rag_prompt"]["system"] + "\n\nRules:\n" + rules_text
     filled_template = data["rag_prompt"]["template"].format(context=context, question=query)
@@ -76,12 +77,11 @@ def has_citations(response):
 
 
 @observe(name="rag-query")
-def get_answers(pdf_path, query, chat_history=[]):
+def get_answers(file_paths, query, chat_history=[]):
     langfuse = get_client()
 
-    # Set trace input/metadata
     langfuse.set_current_trace_io(
-        input={"query": query, "pdf": os.path.basename(pdf_path)}
+        input={"query": query, "files": len(file_paths)}
     )
 
     # 1. Query rewrite
@@ -89,7 +89,7 @@ def get_answers(pdf_path, query, chat_history=[]):
 
     # 2. Retrieval
     start = time.time()
-    top_chunks = retrieve(pdf_path, rewritten_query, k=10, top_k=5)
+    top_chunks = retrieve(file_paths, rewritten_query, k=10, top_k=5)
     retrieval_latency = round((time.time() - start) * 1000)
 
     # 3. Prompt + LLM
@@ -99,28 +99,23 @@ def get_answers(pdf_path, query, chat_history=[]):
         HumanMessage(content=filled_template)
     ]
 
+    # 4. Stream response
     start = time.time()
-    response = llm.invoke(messages)
+    full_response = ""
+    
+    for chunk in llm.stream(messages):
+        token = chunk.content
+        full_response += token
+        yield token          # send each token immediately
+
     llm_latency = round((time.time() - start) * 1000)
 
-    # 4. Citation check
-    if not has_citations(response.content):
-        final_answer = "I don't have enough information in the provided document to answer this question."
-    else:
-        final_answer = response.content
+    # 5. Citation check on complete response
+    if not has_citations(full_response):
+        #yield "\n\nI don't have enough information in the provided document to answer this question."
+        full_response = "I don't have enough information in the provided document to answer this question."
 
-    # Set trace output
-    langfuse.set_current_trace_io(
-        output={"answer": final_answer}
-    )
-    langfuse.score_current_trace(
-        name="retrieval_latency_ms",
-        value=retrieval_latency
-    )
-    langfuse.score_current_trace(
-        name="llm_latency_ms",
-        value=llm_latency
-    )
-
+    langfuse.set_current_trace_io(output={"answer": full_response})
+    langfuse.score_current_trace(name="retrieval_latency_ms", value=retrieval_latency)
+    langfuse.score_current_trace(name="llm_latency_ms", value=llm_latency)
     langfuse.flush()
-    return final_answer
